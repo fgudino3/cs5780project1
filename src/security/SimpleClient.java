@@ -1,4 +1,4 @@
-package ssl;
+package security;
 
 import java.net.Socket;
 
