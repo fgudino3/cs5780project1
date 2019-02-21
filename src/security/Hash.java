@@ -29,15 +29,14 @@ public class Hash {
 	 * @return the number of bytes a packet occupies
 	 */
 	public int getPacketSize() {
-		// TODO
-		return ncb;
+		return 1 + ndb + ncb;
 	}
 
 	/*
 	 * @return the number of data bytes in a packet
 	 */
 	public int getNumberOfDataBytes() {
-		return this.ndb;
+		return ndb;
 	}
 
 	/*
@@ -49,8 +48,7 @@ public class Hash {
 	 * @return assembled packets
 	 */
 	public byte[] pack(byte data[]) {
-		// TODO
-		return data;
+		return pack(data, ndb, ncb, p, k);
 	}
 
 	/*
@@ -61,8 +59,11 @@ public class Hash {
 	 * @param nused - package only the first these many bytes
 	 */
 	public byte[] pack(byte data[], int nused) {
-		// TODO
-		return data;
+		byte[] dataSubset = new byte[nused];
+		
+		System.arraycopy(data, 0, dataSubset, 0, nused);
+		
+		return pack(dataSubset, ndb, ncb, p, k);
 	}
 
 	/*
@@ -96,8 +97,7 @@ public class Hash {
 	 * @throws Exception if the checksums are incorrect
 	 */
 	public byte[] unpack(byte packets[]) throws Exception {
-		// TODO
-		return packets;
+		return unpack(packets, ndb, ncb, p, k);
 	}
 
 	/*
@@ -131,7 +131,22 @@ public class Hash {
 	 * @throws Exception gathered while running the program
 	 * */
 	public static void main(String[] args) throws Exception {
-		// TODO
+		if (args.length < 5) {
+			System.out.println("Error. Must have 5 or more arguments. Follow the command guideline below\n");
+			System.out.println("java security.Hash <databytes> <checkbytes> <pattern> <k> <text1> ... <textn>");
+			return;
+		}
+		
+		int databytes = Integer.parseInt(args[0]);
+		int checkbytes = Integer.parseInt(args[1]);
+		byte pattern = (byte) Integer.parseInt(args[2]);
+		int k = Integer.parseInt(args[3]);
+		
+		for (int i = 4; i < args.length; i++) {
+			byte[] packet = pack(args[i].getBytes(), databytes, checkbytes, pattern, k);
+			System.out.println("Packed Bytes: " + new String(packet));
+			System.out.println("Unpacked Bytes: " + new String(unpack(packet, databytes, checkbytes, pattern, k)));
+		}
 	}
 
 }
