@@ -1,5 +1,7 @@
 package security;
 
+import java.math.BigInteger;
+
 public class Hash {
 
 	private int ndb;
@@ -83,8 +85,36 @@ public class Hash {
 	 * @return assembled packets
 	 */
 	public static byte[] pack(byte data[], int ndatabytes, int ncheckbytes, byte pattern, int k) {
-		// TODO
-		return data;
+		int packetSize = 1 + ndatabytes + ncheckbytes;
+		byte[] packet = new byte[packetSize];
+		
+		// calculate checksum
+		BigInteger checksum = BigInteger.ZERO;
+		
+		for (int i = 0; i < ndatabytes; i++) {
+			if (i < data.length)
+				checksum = checksum.add(BigInteger.valueOf((pattern & data[i]) * k));
+			else
+				checksum = checksum.add(BigInteger.valueOf((pattern & 0) * k));
+		}
+		
+		checksum = checksum.mod(BigInteger.valueOf((long) Math.pow(2, 8 * ncheckbytes)));
+		
+		// n
+		packet[0] = (byte) data.length;
+		
+		// data bytes
+		for (int i = 1; i < packetSize - 1; i++) {
+			if (i - 1 < data.length)
+				packet[i] = data[i - 1];
+			else
+				packet[i] = 0;
+		}
+		
+		// checksum
+		packet[packetSize - 1] = checksum.byteValue();
+		
+		return packet;
 	}
 
 	/*
@@ -119,8 +149,25 @@ public class Hash {
 	 * @throws Exception if the checksum bytes are incorrect
 	 * */
 	public static byte[] unpack(byte packets[], int ndatabytes, int ncheckbytes, byte pattern, int k) throws Exception {
-		// TODO
-		return packets;
+		// calculate checksum
+		BigInteger checksum = BigInteger.ZERO;
+		
+		for (int i = 1; i < packets.length - 1; i++)
+			checksum = checksum.add(BigInteger.valueOf((pattern & packets[i]) * k));
+		
+		checksum = checksum.mod(BigInteger.valueOf((long) Math.pow(2, 8 * ncheckbytes)));
+		
+		// verify that the checksums are equal
+		if (checksum.byteValue() != packets[packets.length - 1])
+			throw new Exception("Checksum bytes are not equal. Fake User.");
+		
+		// if packages are equal, return original data
+		byte[] data = new byte[packets[0]];
+		
+		for (int i = 0; i < data.length; i++)
+			data[i] = packets[i + 1];
+		
+		return data;
 	}
 
 	/*
@@ -136,16 +183,18 @@ public class Hash {
 			System.out.println("java security.Hash <databytes> <checkbytes> <pattern> <k> <text1> ... <textn>");
 			return;
 		}
-		
+
 		int databytes = Integer.parseInt(args[0]);
 		int checkbytes = Integer.parseInt(args[1]);
 		byte pattern = (byte) Integer.parseInt(args[2]);
 		int k = Integer.parseInt(args[3]);
-		
+
+		Hash hash = new Hash(databytes, checkbytes, pattern, k);
+
 		for (int i = 4; i < args.length; i++) {
-			byte[] packet = pack(args[i].getBytes(), databytes, checkbytes, pattern, k);
+			byte[] packet = hash.pack(args[i].getBytes());
 			System.out.println("Packed Bytes: " + new String(packet));
-			System.out.println("Unpacked Bytes: " + new String(unpack(packet, databytes, checkbytes, pattern, k)));
+			System.out.println("Unpacked Bytes: " + new String(hash.unpack(packet)));
 		}
 	}
 
