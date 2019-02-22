@@ -72,6 +72,9 @@ public class Hash {
 	 * @return assembled packets
 	 */
 	public static byte[] pack(byte data[], int ndatabytes, int ncheckbytes, byte pattern, int k) {
+		if (ndatabytes > 256)
+			throw new RuntimeException("Number of data bytes must not exceed 255");
+		
 		int packetSize = 1 + ndatabytes + ncheckbytes;
 		byte[] packet = new byte[packetSize];
 		
@@ -126,6 +129,9 @@ public class Hash {
 	 * @throws Exception if the checksum bytes are incorrect
 	 * */
 	public static byte[] unpack(byte packets[], int ndatabytes, int ncheckbytes, byte pattern, int k) throws Exception {
+		if (ndatabytes > 256)
+			throw new RuntimeException("Number of data bytes must not exceed 255");
+		
 		// calculate checksum
 		BigInteger checksum = BigInteger.ZERO;
 		
