@@ -15,8 +15,11 @@ public class OneTimeKey {
 	 * @return a new on-time key of n bytes
 	 */
 	 public static byte[] newKey(Random R, int n) {
-		 // TODO
-		 return null;
+		 byte[] key = new byte[n];
+		 
+		 R.nextBytes(key);
+		 
+		 return key;
 	 }
 	 
 	 /**
@@ -26,8 +29,7 @@ public class OneTimeKey {
 	  * @return a new on-time key of n bytes
 	  */
 	 public static byte[] newKey(int n) {
-		 // TODO
-		 return null;
+		 return newKey(new Random(System.currentTimeMillis()), n);
 	 }
 	 
 	 /**
@@ -38,8 +40,15 @@ public class OneTimeKey {
 	  * @throws Exception for corrupt messages
 	  */
 	 public static byte[] xor(byte M[], byte K[]) throws Exception {
-		 // TODO
-		 return K;
+		 if (M.length % K.length != 0)
+			 throw new Exception("Incorrect key length");
+		 
+		 byte[] encoded = new byte[M.length];
+		 
+		 for (int i = 0; i < encoded.length; i++)
+			 encoded[i] = (byte) (M[i] ^ K[i % K.length]);
+		 
+		 return encoded;
 	 }
 	 
 	 /**
@@ -49,7 +58,7 @@ public class OneTimeKey {
 	  * @throws IOException if os is corrupt
 	  */
 	 public static void printKey(byte b[], OutputStream os) throws IOException {
-		 // TODO
+		 os.write(b);
 	 }
 	 
 	/**
@@ -59,7 +68,21 @@ public class OneTimeKey {
 	 * @throws Exception if an error occurs
 	 */
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
+		if (args.length < 2) {
+			System.out.println("Error. Must have 2 or more arguments. Follow the command guideline below\n");
+			System.out.println("java security.OneTimeKey <key>  <text1> ... <textn>");
+			return;
+		}
+		
+		byte[] key = args[0].getBytes();
+		
+		for (int i = 1; i < args.length; i++) {
+			byte[] encoded = xor(args[i].getBytes(), key);
+			
+			System.out.println("original text is " + args[i]);
+			System.out.println("encoded to " + new String(encoded));
+			System.out.println("decoded to " + new String(xor(encoded, key)));
+		}
 
 	}
 
