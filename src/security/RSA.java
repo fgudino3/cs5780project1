@@ -1,33 +1,14 @@
 package security;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 public class RSA {
 
-	public static void main(String[] args) {		
-		if (args.length == 1)
-			generate(Integer.parseInt(args[0]));
-		else if (args.length == 3)
-			generate(new BigInteger(args[0]), new BigInteger(args[1]), new BigInteger(args[2]));
-		else
-			System.out.println("Error. Must have 1 or 3 arguments");
+	public RSA() {
 	}
 
-	private static void generate(int k) {
-		Random r = new Random();
-
-		// pick 2 large prime numbers
-		BigInteger p = BigInteger.probablePrime(k, r);
-		BigInteger q = BigInteger.probablePrime(k, r);
-
+	public static RSA.KeyPair generateKeys(BigInteger p, BigInteger q) {
 		// calculate n
 		BigInteger n = p.multiply(q);
 
@@ -39,51 +20,67 @@ public class RSA {
 		BigInteger phiN = pMinus1.multiply(qMinus1);
 
 		// possible e such that 1 < e < phiN
-		BigInteger e = BigInteger.probablePrime(k / 2, r);
-		
-		// gcd(phiN, possible e's) = 1 and 1 < e < phiN
-		while (phiN.gcd(e).compareTo(BigInteger.ONE) != 0 && e.compareTo(phiN) < 0)
-			e.add(BigInteger.ONE);
-		
+		BigInteger e = BigInteger.probablePrime(phiN.bitLength(), new Random());
+
 		// calculate d
 		BigInteger d = e.modInverse(phiN);
-
-		createKeys(e, d, n);
-	}
-
-	private static void generate(BigInteger p, BigInteger q, BigInteger e) {
-		// calculate n
-		BigInteger n = p.multiply(q);
-
-		// (p - 1), (q - 1)
-		BigInteger pMinus1 = p.subtract(BigInteger.ONE);
-		BigInteger qMinus1 = q.subtract(BigInteger.ONE);
-
-		// (p - 1) X (q - 1)
-		BigInteger phiN = pMinus1.multiply(qMinus1);
 		
-		// calculate d
-		BigInteger d = e.modInverse(phiN);
+		// save key pair
+		RSA.KeyPair keyPair = new RSA.KeyPair(e, d, n);
 
-		createKeys(e, d, n);
+		return keyPair;
 	}
 
-	private static void createKeys(BigInteger e, BigInteger d, BigInteger n) {
-		List<String> pubKey = Arrays.asList("e = " + e, "n = " + n);
-		List<String> priKey = Arrays.asList("d = " + d, "n = " + n);
-		Path pub = Paths.get("pub_key.txt");
-		Path pri = Paths.get("pri_key.txt");
+	public static byte[] cipher(byte M[], byte[] K) throws Exception {
+		// TODO
+		return null;
+	}
 
-		try {
-			Files.write(pub, pubKey, Charset.forName("UTF-8"));
-			Files.write(pri, priKey, Charset.forName("UTF-8"));
-		} catch (IOException e1) {
-			e1.printStackTrace();
+	public static byte[] cipher(String s, byte[] K) throws Exception {
+		// TODO
+		return null;
+	}
+
+	public static void main(String[] args) {
+		// TODO
+	}
+
+	private static class KeyPair {
+
+		private BigInteger pubKey;
+		private BigInteger priKey;
+		private BigInteger n;
+
+		public KeyPair(BigInteger pubKey, BigInteger priKey, BigInteger n) {
+			this.setPubKey(pubKey);
+			this.setPriKey(priKey);
+			this.setN(n);
 		}
-		
-		System.out.println("public key  = " + e);
-		System.out.println("private key = " + d);
-		System.out.println("n = " + n);
+
+		public BigInteger getPubKey() {
+			return pubKey;
+		}
+
+		public void setPubKey(BigInteger pubKey) {
+			this.pubKey = pubKey;
+		}
+
+		public BigInteger getPriKey() {
+			return priKey;
+		}
+
+		public void setPriKey(BigInteger priKey) {
+			this.priKey = priKey;
+		}
+
+		public BigInteger getN() {
+			return n;
+		}
+
+		public void setN(BigInteger n) {
+			this.n = n;
+		}
+
 	}
 
 }
