@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class RSAGenKey {
+public class RSA {
 
 	public static void main(String[] args) {		
 		if (args.length == 1)
