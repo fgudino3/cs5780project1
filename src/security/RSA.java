@@ -1,5 +1,8 @@
 package security;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -71,7 +74,7 @@ public class RSA {
 		//		return;
 		//	}
 		RSA.KeyPair keys = generateKeys(BigInteger.probablePrime(64, new Random()), BigInteger.probablePrime(64, new Random()));
-		
+		System.out.println(keys);
 		String msg = "testing";
 		
 		byte[] cipher = cipher(msg, keys.getPubKey());
@@ -80,45 +83,80 @@ public class RSA {
 		System.out.println("original: " + new String(cipher(cipher, keys.getPriKey())));
 	}
 
-	private static class KeyPair {
+	public static class KeyPair {
 
-		private RSA.PublicKey pubKey;
-		private RSA.PrivateKey priKey;
+		private PublicKey pubKey;
+		private PrivateKey priKey;
 
-		public KeyPair(RSA.PublicKey pubKey, RSA.PrivateKey priKey) {
+		public KeyPair(PublicKey pubKey, PrivateKey priKey) {
 			this.pubKey = pubKey;
 			this.priKey = priKey;
 		}
 
-		public RSA.PublicKey getPubKey() {
+		public PublicKey getPubKey() {
 			return pubKey;
 		}
 
-		public RSA.PrivateKey getPriKey() {
+		public PrivateKey getPriKey() {
 			return priKey;
+		}
+		
+		// Convert the key pair to a string and return the string
+		public String toString() {
+			return "KR={" + priKey.getKey() + "," + priKey.getN() + "}\n"
+					+ "KU={" + pubKey.getKey() + "," + pubKey.getN() + "}";			
 		}
 
 	}
 
-	private static abstract class Key {
+	public static class Key {
+		// a Key is represented by two large Integers.
 		protected BigInteger key;
 		protected BigInteger n;
-
+		private static final BigInteger zero = BigInteger.ZERO;
+		
+		public Key() {
+			this(zero, zero);
+		}
+		
 		public Key(BigInteger key, BigInteger n) {
 			this.key = key;
 			this.n = n;
 		}
 
-		public BigInteger getKey() {
+		protected BigInteger getKey() {
 			return key;
 		}
 
-		public BigInteger getN() {
+		protected BigInteger getN() {
 			return n;
 		}
+		
+		// convert byte input to inputstream
+		public void read(byte m[]) throws IOException {
+			read(new ByteArrayInputStream(m));
+		}
+		
+		public void read(InputStream input) throws IOException {
+			// TODO
+		}
+		
+		// Convert key and n to a string
+		public String toString() {
+			return "key={" + key + "," + n + "}";
+		}
+		
 	}
 
-	private static class PublicKey extends RSA.Key {
+	public static class PublicKey extends Key {
+		
+		public PublicKey(byte aByte[]) throws IOException {
+			read(aByte);
+		}
+
+		public PublicKey(InputStream input) throws IOException {
+			read(input);
+		}
 
 		public PublicKey(BigInteger key, BigInteger n) {
 			super(key, n);
@@ -126,7 +164,15 @@ public class RSA {
 
 	}
 
-	private static class PrivateKey extends RSA.Key {
+	public static class PrivateKey extends Key {
+		
+		public PrivateKey(byte aByte[]) throws IOException {
+		    read(aByte);
+		}
+
+		public PrivateKey(InputStream input) throws IOException {
+		    read(input);
+		}
 
 		public PrivateKey(BigInteger key, BigInteger n) {
 			super(key, n);
