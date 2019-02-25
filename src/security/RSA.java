@@ -69,18 +69,46 @@ public class RSA {
 	 * @throws Exception any error occurring
 	 */
 	public static void main(String[] args) throws Exception {
-		//	if (args.length < 1) {
-		//		System.out.println("Error. Must have 1 or more arguments");
-		//		return;
-		//	}
-		RSA.KeyPair keys = generateKeys(BigInteger.probablePrime(64, new Random()), BigInteger.probablePrime(64, new Random()));
-		System.out.println(keys);
-		String msg = "testing";
-		
-		byte[] cipher = cipher(msg, keys.getPubKey());
-		
-		System.out.println("cipher: " + new String(cipher));
-		System.out.println("original: " + new String(cipher(cipher, keys.getPriKey())));
+		if (args.length < 1) {
+			System.out.println("Must have 1 or more arguments. Follow the command guideline below for assistance.");
+			System.out.println("java security.RSA -help");
+			return;
+		} else if (args[0].equals("-help")) {
+			System.out.println("java security.RSA -help");
+			System.out.println("\t- this message\n");
+			System.out.println("java security.RSA -gen <text>");
+			System.out.println("\t- generate private (KR) and public (KU) keys");
+			System.out.println("\t  and test them on <text> (optional)");
+		} else if (args[0].equals("-gen") && args.length <= 2) {
+			String p1 = System.getProperty("prime_size");
+			String p2 = System.getProperty("prime_certainty");
+			int primeSize = 256;
+			int primeCertainty = 5;
+			
+			if (p1 != null) {
+				int temp = Integer.parseInt(p1);
+				
+				if (temp > 127 && temp < 1024)
+					primeSize = temp;
+			}
+			
+			if (p2 != null)
+				primeCertainty = Integer.parseInt(p2);
+			
+			BigInteger p = new BigInteger(primeSize, primeCertainty, new Random());
+			BigInteger q = new BigInteger(primeSize, primeCertainty, new Random());
+			
+			RSA.KeyPair keys = generateKeys(p, q);
+			
+			System.out.println(keys);
+			
+			if (args.length == 2) {
+				byte[] cipher = cipher(args[1], keys.getPubKey());
+				
+				System.out.println("\ncipher: " + new String(cipher));
+				System.out.println("\noriginal: " + new String(cipher(cipher, keys.getPriKey())));
+			}
+		}
 	}
 
 	public static class KeyPair {
@@ -103,8 +131,8 @@ public class RSA {
 		
 		// Convert the key pair to a string and return the string
 		public String toString() {
-			return "KR={" + priKey.getKey() + "," + priKey.getN() + "}\n"
-					+ "KU={" + pubKey.getKey() + "," + pubKey.getN() + "}";			
+			return "KR={" + priKey.getKey() + ", " + priKey.getN() + "}\n\n"
+					+ "KU={" + pubKey.getKey() + ", " + pubKey.getN() + "}";			
 		}
 
 	}
@@ -138,12 +166,46 @@ public class RSA {
 		}
 		
 		public void read(InputStream input) throws IOException {
-			// TODO
+			// the first character of the file must be '{'
+			if (input.read() != 123)
+				throw new IOException("Must follow format: {key,n}");
+			
+			StringBuffer sb = new StringBuffer();
+			int inputInt = input.read();
+			
+			// every number is part of the key until a ',' is reached
+			while (inputInt != 44) {
+				sb.append((char) inputInt);
+				inputInt = input.read();
+			}
+			
+			// if the string is not a number, throw an exception
+			try {
+				key = new BigInteger(sb.toString());
+			} catch (NumberFormatException nfe) {
+				throw new IOException(nfe.toString());
+			}
+			
+			sb = new StringBuffer();
+			inputInt = input.read();
+			
+			// every number is part of the n until a '}' is reached
+			while (inputInt != 125) {
+				sb.append((char) inputInt);
+				inputInt = input.read();
+			}
+			
+			// if the string is not a number, throw an exception
+			try {
+				n = new BigInteger(sb.toString());
+			} catch (NumberFormatException nfe) {
+				throw new IOException(nfe.toString());
+			}
 		}
 		
 		// Convert key and n to a string
 		public String toString() {
-			return "key={" + key + "," + n + "}";
+			return "key={" + key + ", " + n + "}";
 		}
 		
 	}
@@ -167,11 +229,11 @@ public class RSA {
 	public static class PrivateKey extends Key {
 		
 		public PrivateKey(byte aByte[]) throws IOException {
-		    read(aByte);
+			read(aByte);
 		}
 
 		public PrivateKey(InputStream input) throws IOException {
-		    read(input);
+			read(input);
 		}
 
 		public PrivateKey(BigInteger key, BigInteger n) {
