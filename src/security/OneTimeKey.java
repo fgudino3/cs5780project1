@@ -41,7 +41,7 @@ public class OneTimeKey {
 	  */
 	 public static byte[] xor(byte M[], byte K[]) throws Exception {
 		 if (M.length % K.length != 0)
-			 throw new Exception("Incorrect key length");
+			 throw new Exception("Incorrect key length. K.length " + K.length + ", M.length " + M.length);
 		 
 		 byte[] encoded = new byte[M.length];
 		 

@@ -43,26 +43,10 @@ public class SSLSocket extends Socket{
 	}
 	
 	public SSLSocket(Socket s, byte[] K, Hash H) throws IOException{
-		//super(s.getInetAddress(), s.getPort());
-		  
+		
 		this.s = s;
 		this.K = K;
 		this.H = H;
-		
-//		byte[] cipherUserName;
-//		byte[] cipherCompanyName;
-//		byte[] cipherK;
-//		try {
-//			cipherUserName = RSA.cipher(user.getUserName(), user.getPubKey());
-//			cipherCompanyName = RSA.cipher(user.getCompanyName(), user.getPriKey());
-//			cipherK = RSA.cipher(K, user.getPubKey());
-//			handshake(cipherUserName, cipherCompanyName, cipherK);
-//			
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		 
 	}
 	
 	protected void handshake(byte[] KID, byte[] MC, byte[] KC) throws IOException{

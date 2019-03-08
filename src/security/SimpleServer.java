@@ -105,7 +105,7 @@ public class SimpleServer implements Runnable {
                 sock.getOutputStream().flush();
                 // flush output if no more data on input
                 if (sock.getInputStream().available() == 0) {
-                   //sock.getOutputStream().flush();
+                   sock.getOutputStream().flush();
                 }
             }
 
@@ -113,7 +113,7 @@ public class SimpleServer implements Runnable {
             sock.close();
             System.out.println("disconnect...");
          } catch (Exception e) {
-            System.out.println("HANDLER: " + e);
+            System.out.println("HANDLER: " + e.getMessage() + e.getStackTrace());
          }
       } 
    }

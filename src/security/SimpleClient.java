@@ -21,7 +21,7 @@ public class SimpleClient {
 		   int k = user.getK();
 		   
 		   this.H = new Hash(databytes, checkbytes, pattern, k);
-		   this.K = OneTimeKey.newKey(k);
+		   this.K = OneTimeKey.newKey(1 + databytes + checkbytes);
 		   
 	       // open a connection to the server
 	       s = new Socket(host,port);
@@ -47,6 +47,8 @@ public class SimpleClient {
 	         if ((char)c == '\n' || (char)c == '\r') 
 	        	 socket.getOutputStream().flush();
 	         ++k;
+	         
+	         System.out.println(c);
 	      }
 	      socket.getOutputStream().flush();
 	      
