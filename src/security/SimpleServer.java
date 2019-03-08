@@ -59,6 +59,7 @@ public class SimpleServer implements Runnable {
 		   usersProps = new Properties();
 		   usersProps.load(new FileInputStream(fileName));
 		   this.users = usersProps;
+		   
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -87,7 +88,9 @@ public class SimpleServer implements Runnable {
 
       public void run() {
          try {
-            System.out.println("connect...");
+        	 System.out.println(users.toString());
+        	 System.out.println("handshake complete");
+             System.out.println("connect...");
             
             int c;
             
